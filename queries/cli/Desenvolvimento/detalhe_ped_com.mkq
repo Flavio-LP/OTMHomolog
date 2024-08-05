@@ -82,6 +82,8 @@
 
       +> ALTERAR_PRAZO : %SVGC/icone/lib-com/calendar_01 : Alterar prazo (dias de entrega) : NSair
 
+      +> ALTERAR_ACRES_DESC: %SVGC/icone/lib-com/discount : Incluir desconto/acréscimo : NSair
+
       --Criar tela para inserir desconto/acrescimo
 
     [PLF]
@@ -145,7 +147,10 @@
     #> '[OPC]'='ALTERAR_PRAZO'<#
     @>MKQ
     #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_PRAZO[$ID$][PLE]
-    
+
+    #> '[OPC]'='ALTERAR_ACRES_DESC'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_ACRES_DESC[$ID$][PLE]
 
    [SQL]
    select '#MKQ:cli/Desenvolvimento/detahe_ped_com[$DRILL$'||']VARIAVEL'||LPO.ROWID DRILL#0,
@@ -168,6 +173,7 @@
           LPO.PRAZO "[1][3][5][6][8]+DIAS#2",
           LPO.TP_DCTACR "[1][3][5][6][8]TP_MOV#5" ,
           LPO.TP_VLR "[1][3][5][6][8]TP_VLR#2",
+          LPO.VLR "[1][3][5][6][8]VLR#3",
           LPO.TP_APLICACAO "[1][3][5][6][8]TP_AP#2",
           LPO.DESCRICAO "[1][3][5][6][8]DESCRICAO#2"
     from TLIBERA_PDV_COM_OTM LPO
@@ -703,6 +709,65 @@
     END;
 
     [MIF]
-    Alterado o prazo de entrega em dias no pedido: [PEDIDO]!
-    
+    Alterado o prazo de entrega em dias no pedido: [PEDIDO]!  
+>>
+
+<<ALTERAR_ACRES_DESC
+  ##> '[$DRILL$]' = 'ALTERAR_ACRES_DESC' <##
+  [PAR]
+  [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+  [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+  [EMPRESA] : -empresa : FK : (SELECT EMPR_ID FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);EMPR_ID;EMPR_ID || chr(9) || EMPR_ID
+  [TP_DCTACR] : Acréscimo/Desconto : DC250 :D^DESCONTO^A^ACRÉSCIMO
+  [TP_VALOR] : Tipo de valor : DC250 :P^Porcentagem^V^Valor
+  [VLR] : Valor : NM250 : 1 ;0;999 : 0 
+  [TP_APLICACAO] : Tipo de aplicação : DC250 :D^DESTACADO^E^EMBUTIDO
+  [DESCRICAO] : Descrição : TX250 :
+
+  [PLI]
+  DECLARE 
+
+    SEQ NUMBER := FOCCO3I.SEQ_ID_TPDV_DCTACR.NEXTVAL;
+
+  BEGIN
+
+  UPDATE TLIBERA_PDV_COM_OTM 
+     SET TP_DCTACR = '[TP_DCTACR]',
+         TP_VLR = '[TP_VALOR]',
+         VLR = [VLR],
+         TP_APLICACAO = '[TP_APLICACAO]',
+         DESCRICAO = '[DESCRICAO]'
+  WHERE PDV_ID = [PDV]
+    AND SESSAO = [$SESSAO$];
+    COMMIT;
+
+
+  INSERT INTO FOCCO3I.TPDV_DCTACR(PDV_ID,
+                                  ID,
+                                  descricao,
+                                  TP_DCTACR,
+                                  VLR,
+                                  TP_VLR,
+                                  TP_APLICACAO,
+                                  TP_INF,
+                                  POL_COMIS,
+                                  ALT_ACRES_PDV,
+                                  ABATE_COMIS) 
+                                  VALUES 
+                                  ([PDV],
+                                  SEQ,
+                                  '[DESCRICAO]',
+                                  '[TP_DCTACR]',
+                                  [VLR],
+                                  '[TP_VALOR]',
+                                  '[TP_APLICACAO]',
+                                  'I',
+                                  0,
+                                  1,
+                                  0);
+  COMMIT;
+
+
+  END;
+
 >>
