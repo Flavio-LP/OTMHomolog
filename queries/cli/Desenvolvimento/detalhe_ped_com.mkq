@@ -1,0 +1,672 @@
+<< LIBERAR
+    ##> '[$DRILL$]' = 'LIBERAR_PEDIDO' <##
+    [PAR]
+    [SESSAO] : -Sessao	 : FK    : (SELECT SYS_CONTEXT('USERENV','SESSIONID') sessao FROM DUAL);sessao;sessao||chr(9)||sessao;1=1
+    [VARIAVEL]: -Teste: FK: (select '[$DRIL'||'L$]' X from dual);X;X||chr(9)||X
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ROWID$]');X;X||chr(9)||X
+    [Pedido] : -Pedido : FK : (SELECT PDV.NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA PDV WHERE PDV.ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO||chr(9)||NUM_PEDIDO; 1=1
+    [EMPRESA]: -Empresa  : FK500 : (SELECT PDV.EMPR_ID FROM FOCCO3I.TPEDIDOS_VENDA PDV WHERE PDV.ID = [PDV]);EMPR_ID;EMPR_ID||chr(9)||EMPR_ID
+    [CLIENTE]: -Cliente : FK : (SELECT PDV.CLI_ID FROM FOCCO3I.TPEDIDOS_VENDA PDV WHERE PDV.ID = [PDV]);CLI_ID;CLI_ID||chr(9)||CLI_ID
+    [REPRESENTANTE]: -representante : FK: (SELECT PDV.REP_ID FROM FOCCO3I.TPEDIDOS_VENDA PDV WHERE PDV.ID = [PDV]);REP_ID;REP_ID || chr(9) || REP_ID
+    [TP_NF_PDV] : -tp_nf_pdv : FK :(SELECT TPNF_ID_DEFAULT FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);TPNF_ID_DEFAULT;TPNF_ID_DEFAULT || chr(9) || TPNF_ID_DEFAULT
+    [CLI_VINC] : -cli_vinc : FK : (SELECT CLI_V_CLI_ID FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);CLI_V_CLI_ID;CLI_V_CLI_ID || chr(9) || CLI_V_CLI_ID
+
+    [DIM]
+    90 : 50 : 0 : 25 : 80 : 15 : 100
+
+   [PAR]
+   [GRD_EMPRESA] : -grd_empresa : FK :(select x from (SELECT  NOME_FAN x FROM FOCCO3I.TEMPRESAS WHERE ID = [EMPRESA])); x;0||chr(9)||x;1=1
+   [GRD_REP] : -grd_rep : FK : (SELECT COD_REP || ' - ' || DESCRICAO REP FROM FOCCO3I.TREPRESENTANTES WHERE ID = [REPRESENTANTE]);REP;REP || chr(9) || REP
+   [GRD_CLI] : -grd_cli : FK : (SELECT COD_CLI || ' - ' || DESCRICAO CLI FROM FOCCO3I.TCLIENTES WHERE ID = [CLIENTE]);CLI;CLI || chr(9) || CLI
+   [GRD_CLI_VINC] : -grd_cli : FK : (SELECT NVL( (SELECT TCLIENTES.COD_CLI  || ' - ' || TCLIENTES.DESCRICAO CLI
+                                                    FROM FOCCO3I.TCLI_VINC_CLI TCLI_VINC_CLI,
+                                                            FOCCO3I.TCLIENTES TCLIENTES
+                                                    WHERE  TCLI_VINC_CLI.CLI_ID_DEST = TCLIENTES.ID
+                                                        AND TCLI_VINC_CLI.ID = [CLI_VINC]), 'N/A') CLI_VINC FROM DUAL );CLI_VINC;CLI_VINC || chr(9) || CLI_VINC 
+   [GRD_OBS_PED] : -grd_obs_ped : FK : (SELECT NVL((SELECT OBS FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]),'N/A') OBS FROM DUAL);OBS;OBS || chr(9) || OBS
+   [GRD_TP_NF] : -grd_tp_nf : FK : (SELECT COD_TP_NF || ' - ' || DESCRICAO TP_NF FROM FOCCO3I.TTIPOS_NF WHERE ID = [TP_NF_PDV]);TP_NF;TP_NF || chr(9) || TP_NF
+   [GRD_REP_CORD]: -grd_rep_cord : FK :(SELECT NVL((SELECT TREPRESENTANTES_COORDENADOR.COD_REP || ' - ' || TREPRESENTANTES_COORDENADOR.DESCRICAO 
+                                            FROM FOCCO3I.TREPRESENTANTES TREPRESENTANTES_COORDENADOR,
+                                                 FOCCO3I.TREP_HIERARQUIA TREP_HIERARQUIA_COORDENADOR
+                                            WHERE TREP_HIERARQUIA_COORDENADOR.REP_SUP_ID = TREPRESENTANTES_COORDENADOR.ID
+                                            AND TREP_HIERARQUIA_COORDENADOR.REP_ID = [REPRESENTANTE]
+                                            AND ROWNUM < 2),'N/A') COORDENADOR FROM DUAL); COORDENADOR; COORDENADOR || chr(9) || COORDENADOR
+   [GRD_OBS_PDV_NF] : -grd_obs_pdv_nf : FK : (SELECT NVL((SELECT OBS_NFS FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]),'N/A') OBS_NFS FROM DUAL);OBS_NFS;OBS_NFS || chr(9) || OBS_NFS                                            
+
+
+   
+   [GRD]
+   [1] : {[GRD_EMPRESA]}
+   [2] : {[GRD_CLI]}
+   [3] : {[GRD_REP]}
+   [4] : {[GRD_CLI_VINC]}
+   [5] : {[GRD_REP_CORD]}
+   [6] : {[GRD_TP_NF]}
+   [7] : {[GRD_OBS_PED]}
+   [8] : {[GRD_OBS_PDV_NF]}
+
+   [PLE]
+   ID#0
+   
+   [OPC]
+      +> LIBERAR : %SVGC/icone/lib-com/unlock : Liberar pedido : NSair
+    
+      +> CONSULTAR_ITENS: %SVGC/icone/lib-com/list-svgrepo  : Consultar itens : NSair 
+
+      +> ALTERAR_FRETE : %SVGC/icone/truck-fast : Alterar tipo de frete: NSair
+
+      +> ALTERAR_PORTADOR :%SVGC/icone/lib-com/dropbox : Alterar portador : NSair
+
+      +> ALTERAR_OBS_PEDIDO : %SVGC/icone/lib-com/journal-check-svgrepo : Alterar observação do pedido : NSair
+
+      +> ALTERAR_FIRME :%SVGC/icone/lib-com/hands-helping : Alterar acordo de entrega: NSair 
+
+      +> ALTERAR_DATA_ENTREGA :%SVGD/calendario_preenchido : Alterar data de entrega: NSair
+
+      +> ALTERAR_COND_PAGTO :%SVGC/icone/lib-com/payment-svgrepo : Alterar condição de pagamento : NSair
+       
+      +> ALTERAR_DIVISAO_VENDAS :%SVGC/icone/lib-com/sale-svgrepo: Alterar divisão de vendas : NSair 
+
+      +> ALTERAR_ORDEM_COMPRA :%SVGC/icone/lib-com/sale-svgrepo: Alterar ordem de compra : NSair 
+
+      +> ALTERAR_COMISSAO :%SVGC/icone/lib-com/sale-svgrepo: Alterar comissões : NSair 
+
+      +> ALTERAR_REPRESENTANTE: %SVGC/icone/lib-com/people-svgrepo : Alterar representante : NSair
+
+      +> ALTERAR_CLIENTE_ENTR: %SVGC/icone/lib-com/user-people-account : Alterar Cliente de entrega : exists ( select 1
+                                                                                                                 from FOCCO3I.TPEDIDOS_VENDA 
+                                                                                                                where id = [PDV]
+                                                                                                                  and CLI_V_CLI_ID is not null ) 
+      
+      +> ALTERAR_TP_NOTA :  %SVGC/icone/lib-com/user-people-account : Alterar tipo de nota fiscal : NSair
+
+
+
+      --Criar tela para inserir desconto/acrescimo
+
+    [PLF]
+
+    #> '[OPC]'='LIBERAR'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]LIBERAR[$ID$][PLE]  
+
+    #> '[OPC]'='CONSULTAR_ITENS'<#
+    @>MKQ
+    #CLI/Desenvolvimento/itens_pdv[VARIAVEL]CONSULTAR_ITENS[$ID$][PLE]  
+
+    #> '[OPC]'='ALTERAR_FRETE'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_FRETE[$ID$][PLE]
+       
+    #> '[OPC]'='ALTERAR_PORTADOR'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_PORTADOR[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_OBS_PEDIDO'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_OBS_PEDIDO[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_FIRME'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_FIRME[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_DATA_ENTREGA'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_DATA_ENTREGA[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_COND_PAGTO'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_COND_PAGTO[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_DIVISAO_VENDAS'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_DIVISAO_VENDAS[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_ORDEM_COMPRA'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_ORDEM_COMPRA[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_COMISSAO'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_COMISSAO[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_REPRESENTANTE'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_REPRESENTANTE[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_CLIENTE_ENTR'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_CLIENTE_ENTR[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_TP_NOTA'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_TP_NOTA[$ID$][PLE]
+    
+
+   [SQL]
+   select '#MKQ:cli/Desenvolvimento/detahe_ped_com[$DRILL$'||']VARIAVEL'||LPO.ROWID DRILL#0,
+          LPO.ROWID "ID#0",
+          LPO.DIVISAO_VENDAS "[1][2][4][6][7]DIV VENDA#5",
+          LPO.NUM_PEDIDO "[1][2][4][6][7]PDV FOCCO#5",
+          LPO.PDV_REP "[1][2][4][6][7]PDV REP#5",
+          LPO.ORDEM_COMPRA "[1][2][4][6][7]ORD. COMPR#5",
+          LPO.SIT_PDV_COM "[1][2][4][6][7]C#1",
+          LPO.SIT_PDV_FIN "[1][2][4][6][7]F#1", 
+          LPO.TP_FRETE "[1][2][4][6][7]FRETE#2",
+          LPO.DATA_ENTREGA "[1][2][4][6][7]DT ENTREGA#D5",
+          LPO.FIRME "[1][2][4][6][7]FIRME#2",
+          LPO.PORTADOR "[1][2][4][6][7]PORTADOR#3",
+          (SELECT COD_TP_IMP_SAI  || ' - ' || DESCRICAO  
+             FROM FOCCO3I.TTP_CALCULO_IMPOSTOS 
+            WHERE ID = LPO.CIMPO_ID ) "[1][2][4][6][7]IMPOSTO#2",
+          LPO.PERC_COMIS "[1][3][5][6][8]COMISSÃO#N2",
+          LPO.COND_PAGTO "[1][3][5][6][8]COND.PAGTO#5",
+          LPO.PRAZO "[1][3][5][6][8]+DIAS#2",
+          LPO.TP_DCTACR "[1][3][5][6][8]TP_MOV#5" ,
+          LPO.TP_VLR "[1][3][5][6][8]TP_VLR#2",
+          LPO.TP_APLICACAO "[1][3][5][6][8]TP_AP#2",
+          LPO.DESCRICAO "[1][3][5][6][8]DESCRICAO#2"
+    from TLIBERA_PDV_COM_OTM LPO
+   where LPO.PDV_ID = [PDV]
+    and LPO.SESSAO = [$SESSAO$]
+
+<<LIBERAR
+    ##> '[$DRILL$]' = 'LIBERAR' <##
+    [PAR]
+    [SESSAO] : -Sessao	 : FK : (SELECT SYS_CONTEXT('USERENV','SESSIONID') sessao FROM DUAL);sessao;sessao||chr(9)||sessao;1=1
+    [VARIAVEL]: -Teste: FK: (select '[$DRIL'||'L$]' X from dual);X;X||chr(9)||X
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+    [Pedido] : -Pedido : FK : (SELECT PDV.NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA PDV WHERE PDV.ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO||chr(9)||NUM_PEDIDO; 1=1
+
+    [MII]
+       Deseja liberar o pedido [Pedido] financeiramente?
+
+    
+    [PLI]
+       DECLARE
+
+       PO_LIB_COM      number:= 0;
+       PO_LIB_COM_PARC number:= 0;
+       PO_LIB_FIN      NUMBER:= 0;
+       PO_LIB_FIN_PARC NUMBER := 0;
+       USUARIO VARCHAR2(70);
+
+
+       BEGIN
+
+       SELECT NVL(TUSUARIOS.LOGIN,OTM_RET_USER_FC)
+              INTO USUARIO
+          FROM OTM_USERS OTM_USERS,
+                FOCCO3I.TUSUARIOS TUSUARIOS
+        WHERE TUSUARIOS.ID = OTM_USERS.USERERP
+          AND  OTM_USERS.SHORTNAME = OTM_RET_USER_FC;
+       
+          FOCCO3I.FOCCO3I_PDV_LIB.LIBERA_PEDIDO([PDV],'COM','PDV',NULL , PO_LIB_COM, PO_LIB_COM_PARC,PO_LIB_FIN,PO_LIB_FIN_PARC);
+          
+          UPDATE FOCCO3I.TMOT_BLQ_PDV
+            SET USUARIO_LIB = USUARIO
+          WHERE PDV_ID = [PDV]
+            AND SEQ = 999
+            AND TP_BLQ = 'COM'
+            AND TP_BLQ_PDV = 'PDV';
+          COMMIT;
+
+          UPDATE TLIBERA_PDV_COM_OTM 
+             SET SIT_PDV_COM = 'LIB'
+           WHERE PDV_ID = [PDV];
+          COMMIT;
+       
+       END;
+
+    [MIF]
+       Pedido [Pedido] liberado financeiramente!
+ >>
+
+
+
+ <<ALTERAR_FRETE
+
+    ##> '[$DRILL$]' = 'ALTERAR_FRETE' <##
+    [TIT]
+    Alteração de tipo de frete
+ 
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+
+    [FRETE] : FRETE	 :FK     : (  SELECT DISTINCT TPEDIDOS_VENDA.TP_FRETE,
+                                     DECODE(TPEDIDOS_VENDA.TP_FRETE    ,'C'
+                                                          ,'Cif-Contrat.'
+                                                          ,'E'
+                                                          ,'Cif-Próprio'
+                                                          ,'O'
+                                                          ,'Convenio'
+                                                          ,'S' 
+                                                          ,'Cortesia'
+                                                          ,'D' 
+                                                          ,'Daf'     
+                                                          ,'F'     
+                                                          ,'Fob-Contrat.'
+                                                          ,'I'     
+                                                          ,'Fob-Próprio' 
+                                                          ,'R' 
+                                                          ,'Retira'     
+                                                          ,'N' 
+                                                          ,'Sem Frete'   
+                                                          ,'Terceiros') FRETE  
+                               FROM FOCCO3I.TPEDIDOS_VENDA TPEDIDOS_VENDA 
+                               WHERE TPEDIDOS_VENDA.TP_FRETE IS NOT NULL);TP_FRETE "Tipo de Frete#5",FRETE "Frete#10"; TP_FRETE || chr(9) || TP_FRETE || ' - ' || FRETE ; 1=1
+       
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+
+    [MII]
+    Deseja alterar o tipo de frete para o pedido: [PEDIDO] ? 
+
+    [PLI]	
+     BEGIN
+    
+    UPDATE FOCCO3I.TPEDIDOS_VENDA 
+      SET TP_FRETE = '[FRETE]'
+     WHERE ID = [PDV];
+       COMMIT;
+
+     UPDATE TLIBERA_PDV_COM_OTM
+       SET TP_FRETE ='[FRETE]'
+      WHERE PDV_ID = [PDV]
+      AND SESSAO = [$SESSAO$];
+      COMMIT;
+
+     END;
+  
+     [MIF]
+     Tipo de frete alterado no pedido: [PEDIDO]
+
+    
+ >>
+
+ <<ALTERAR_PORTADOR
+
+    ##> '[$DRILL$]' = 'ALTERAR_PORTADOR' <##
+    [TIT]
+    Alteração de portador de pedido
+ 
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+
+    [PORTADOR]: Portador : FK : (SELECT ID,COD_POR COD , DESCRICAO PORTADOR 
+                                  FROM FOCCO3I.TPORTADORES TPORTADORES
+                                  WHERE TPORTADORES.COD_POR IN (10,9000)
+                                ); ID "ID#0", COD "CÓDIGO#5", PORTADOR "PORTADOR#5"; ID || chr(9) || COD || ' - ' || PORTADOR
+
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+    
+    [MII]
+    Deseja alterar o portador do pedido: [PEDIDO]? 
+
+    [PLI]	
+     BEGIN
+    
+    UPDATE FOCCO3I.TPEDIDOS_VENDA 
+       SET POR_ID = [PORTADOR]
+     WHERE ID = [PDV];
+     COMMIT;
+
+     UPDATE TLIBERA_PDV_COM_OTM
+       SET POR_ID = [PORTADOR],
+           PORTADOR = (SELECT TPORTADORES.COD_POR || ' - ' || TPORTADORES.DESCRICAO FROM FOCCO3I.TPORTADORES TPORTADORES WHERE TPORTADORES.ID = [PORTADOR])
+     WHERE PDV_ID = [PDV]
+     AND SESSAO = [$SESSAO$];
+     COMMIT;
+
+     END;
+  
+     [MIF]
+     Portador alterado no pedido: [PEDIDO]
+ >>
+
+ <<ALTERAR_OBS_PEDIDO
+
+    ##> '[$DRILL$]' = 'ALTERAR_OBS_PEDIDO' <##
+    [TIT]
+    Alteração de observação de pedido
+ 
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+
+    [OBS] : Observação : TX500 : 1000 :
+
+    [MII]
+    Deseja alterar o portador do pedido: [PEDIDO]? 
+
+    [PLI]	
+     BEGIN
+    UPDATE FOCCO3I.TPEDIDOS_VENDA 
+       SET OBS = '[OBS]'
+     WHERE ID = [PDV];
+     COMMIT;
+
+     END;
+  
+     [MIF]
+     Portador alterado no pedido: [PEDIDO]
+ >>
+
+ <<ALTERAR_FIRME
+
+    ##> '[$DRILL$]' = 'ALTERAR_FIRME' <##
+    [TIT]
+    Alteração de acordo de entrega
+ 
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+
+    [FIRME]: Acordo de entrega : DC200 : 1^SIM^2^NÃO : SIM
+
+    [MII]
+    Deseja alterar a opção de acordo de data de entrega (firme) do pedido: [PEDIDO]? 
+
+    [PLI]	
+     BEGIN
+    UPDATE FOCCO3I.TPEDIDOS_VENDA 
+       SET FIRME = [FIRME]
+     WHERE ID = [PDV];
+     COMMIT;
+
+     UPDATE TLIBERA_PDV_COM_OTM
+       SET FIRME = DECODE([FIRME],1,'S',2,'N')
+     WHERE PDV_ID = [PDV]
+     AND SESSAO = [$SESSAO$];
+     COMMIT; 
+
+     END;
+  
+     [MIF]
+     Alterado a opção de acordo de entrega(firme) no pedido: [PEDIDO]
+ >>
+
+ << ALTERAR_DATA_ENTREGA
+
+    ##> '[$DRILL$]' = 'ALTERAR_DATA_ENTREGA' <##
+    [TIT]
+    Alteração de data de entrega
+ 
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+
+    [DT_ENTREGA] : Data de Entrega : DT250 :
+
+    [MII]
+    Deseja alterar a data de entrega do pedido: [PEDIDO]? 
+
+    [PLI]	
+     BEGIN
+    UPDATE FOCCO3I.TPEDIDOS_VENDA 
+       SET DT_ENTREGA = TO_DATE('[DT_ENTREGA]','DD/MM/YYYY')
+     WHERE ID = [PDV];
+     COMMIT;
+
+     UPDATE TLIBERA_PDV_COM_OTM
+       SET DATA_ENTREGA = TO_DATE('[DT_ENTREGA]','DD/MM/YYYY')
+     WHERE PDV_ID = [PDV]
+     AND SESSAO = [$SESSAO$];
+     COMMIT; 
+
+     END;
+  
+     [MIF]
+     Alterado a data de entrega no pedido: [PEDIDO]
+ >>
+
+ << ALTERAR_COND_PAGTO
+
+    ##> '[$DRILL$]' = 'ALTERAR_COND_PAGTO' <##
+    [TIT]
+    Alteração de condição de pagamento
+ 
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+
+    [PAGTO] : Condição de pagamento : FK : (SELECT DISTINCT ID, COD_CDPG, DESCRICAO 
+                                              FROM FOCCO3I.tcond_pagtos ORDER BY 2 ASC);ID "ID#0", COD_CDPG "Cód. Pagamento#5", DESCRICAO "Descrição#8";ID || chr(9) || COD_CDPG || ' - ' || DESCRICAO
+
+    [MII]
+    Deseja alterar a condição de pagamento do pedido: [PEDIDO]? 
+
+    [PLI]	
+     BEGIN
+    UPDATE FOCCO3I.TPEDIDOS_VENDA 
+       SET CDPG_ID = [PAGTO]
+     WHERE ID = [PDV];
+     COMMIT;
+
+     UPDATE TLIBERA_PDV_COM_OTM
+       SET COND_PAGTO = (SELECT DISTINCT COD_CDPG || ' - ' || DESCRICAO FROM FOCCO3I.TCOND_PAGTOS WHERE ID = [PAGTO])
+     WHERE PDV_ID = [PDV]
+     AND SESSAO = [$SESSAO$];
+     COMMIT; 
+
+     END;
+  
+     [MIF]
+     Alterado a condição de pagamento no pedido: [PEDIDO]
+ >>
+
+ << ALTERAR_DIVISAO_VENDAS
+
+    ##> '[$DRILL$]' = 'ALTERAR_DIVISAO_VENDAS' <##
+    [TIT]
+    Alteração de divisão de vendas
+ 
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+
+    [EMPRESA] : -EMPRESA : FK : (SELECT EMPRESA FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');EMPRESA;EMPRESA || chr(9) || EMPRESA
+
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+
+    [DIVISAO] : Divisão de vendas : FK : (SELECT DISTINCT ID , COD_DIVD , DESCRICAO 
+                                            FROM FOCCO3I.TDIVISOES_VENDAS WHERE EMPR_ID = [EMPRESA] ORDER BY 2 ASC);ID "ID#0", COD_DIVD "Cód. Divisão de Vendas#5", DESCRICAO "Descrição#8";ID || chr(9) || COD_DIVD || ' - ' || DESCRICAO
+
+    [MII]
+    Deseja alterar a divisão de vendas do pedido: [PEDIDO]? 
+
+    [PLI]	
+     BEGIN
+    UPDATE FOCCO3I.TPEDIDOS_VENDA 
+       SET DIVD_ID = [DIVISAO]
+     WHERE ID = [PDV];
+     COMMIT;
+
+     UPDATE TLIBERA_PDV_COM_OTM
+       SET DIVD_ID = [DIVISAO],
+           DIVISAO_VENDAS = (SELECT DISTINCT DESCRICAO FROM FOCCO3I.TDIVISOES_VENDAS WHERE ID = [DIVISAO])
+     WHERE PDV_ID = [PDV]
+     AND SESSAO = [$SESSAO$];
+     COMMIT; 
+
+     END;
+  
+     [MIF]
+     Alterado a divisão de vendas no pedido: [PEDIDO]
+ >>
+
+ << ALTERAR_ORDEM_COMPRA
+
+    ##> '[$DRILL$]' = 'ALTERAR_ORDEM_COMPRA' <##
+    [TIT]
+    Alteração de divisão de vendas
+ 
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+
+    [EMPRESA] : -EMPRESA : FK : (SELECT EMPRESA FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');EMPRESA;EMPRESA || chr(9) || EMPRESA
+
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+
+    [ORD_COMP] : Ordem de Compra : TX250:
+
+    [MII]
+    Deseja alterar a ordem de compra no pedido: [PEDIDO]? 
+
+    [PLI]	
+     BEGIN
+    UPDATE FOCCO3I.TPEDIDOS_VENDA 
+       SET ORDEM_CPR = '[ORD_COMP]'
+     WHERE ID = [PDV];
+     COMMIT;
+
+     UPDATE TLIBERA_PDV_COM_OTM
+       SET ORDEM_COMPRA = '[ORD_COMP]'
+     WHERE PDV_ID = [PDV]
+      AND SESSAO = [$SESSAO$];
+     COMMIT; 
+
+     END;
+  
+     [MIF]
+     Alterado a ordem de compra no pedido: [PEDIDO]
+ >>
+
+ << ALTERAR_COMISSAO
+
+    ##> '[$DRILL$]' = 'ALTERAR_COMISSAO' <##
+    [TIT]
+    Alteração de comissão 
+ 
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+
+    [EMPRESA] : -EMPRESA : FK : (SELECT EMPRESA FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');EMPRESA;EMPRESA || chr(9) || EMPRESA
+
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+
+    [COMISSAO] : Ordem de Compra : NM250 : 1;0; 100 :0
+
+    [MII]
+    Deseja alterar a comissão no pedido e nos itens do pedido: [PEDIDO]? 
+
+    [PLI]	
+     BEGIN
+    UPDATE FOCCO3I.TPEDIDOS_VENDA 
+       SET PERC_COMIS = [COMISSAO]
+     WHERE ID = [PDV];
+     COMMIT;
+
+     UPDATE TLIBERA_PDV_COM_OTM
+       SET PERC_COMIS = [COMISSAO]
+     WHERE PDV_ID = [PDV]
+      AND SESSAO = [$SESSAO$];
+     COMMIT; 
+
+     UPDATE FOCCO3I.TITENS_PDV
+        SET PERC_COMIS = [COMISSAO]
+      WHERE PDV_ID = [PDV];
+      COMMIT;
+
+     END;
+  
+     [MIF]
+     Alterado a comissão no pedido e nos itens do pedido: [PEDIDO]
+ >>
+
+ <<ALTERAR_REPRESENTANTE
+    ##> '[$DRILL$]' = 'ALTERAR_REPRESENTANTE' <##
+
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+    [EMPRESA] : -empresa : FK : (SELECT EMPR_ID FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);EMPR_ID;EMPR_ID || chr(9) || EMPR_ID
+    [REPRESENTANTE] : Representante : FK : (SELECT TREPRESENTANTES.ID ID, TREPRESENTANTES.COD_REP COD_REP, TREPRESENTANTES.DESCRICAO DESCRICAO
+                                               FROM FOCCO3I.TREPRESENTANTES TREPRESENTANTES, 
+                                                    FOCCO3I.TEMP_REP TEMP_REP
+                                              WHERE TREPRESENTANTES.ID = TEMP_REP.REP_ID 
+                                                AND TEMP_REP.EMPR_ID = [EMPRESA]
+                                                AND TEMP_REP.ATIVO = 1); ID "ID#0", COD_REP "Cód. Representante#5", DESCRICAO "Representante#50"; ID || chr(9) || COD_REP || ' - ' || DESCRICAO
+
+    [MII]
+    Deseja alterar o representante do pedido: [PEDIDO]?
+    
+    [PLI]
+    BEGIN
+
+    UPDATE FOCCO3I.TPEDIDOS_VENDA 
+      SET REP_ID = [REPRESENTANTE]
+    WHERE ID = [PDV];
+    COMMIT;
+
+    UPDATE TLIBERA_PDV_COM_OTM
+      SET REP_ID = [REPRESENTANTE],
+          REPRESENTANTE = (SELECT COD_REP || ' - ' || DESCRICAO FROM FOCCO3I.TREPRESENTANTES WHERE ID = [REPRESENTANTE])
+      WHERE PDV_ID = [PDV]
+       AND SESSAO = [$SESSAO$];
+     COMMIT; 
+
+    END;
+
+    [MIF]
+    Representante alterado no pedido: [PEDIDO]!
+ >>
+
+ <<ALTERAR_CLIENTE_ENTR
+    ##> '[$DRILL$]' = 'ALTERAR_CLIENTE_ENTR' <##
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+    [EMPRESA] : -empresa : FK : (SELECT EMPR_ID FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);EMPR_ID;EMPR_ID || chr(9) || EMPR_ID
+    [CLI_V_CLI] : Cliente : FK : (SELECT ID, COD_CLI, DESCRICAO FROM FOCCO3I.TCLIENTES);ID "ID#0", COD_CLI "Cód. Cliente#5", DESCRICAO "Cliente#50"; ID || chr(9) || COD_CLI || ' - ' || DESCRICAO
+    [CLI_V_CLI_ID] :-cli_v_cli_id : FK : (SELECT CLI_V_CLI_ID FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]); CLI_V_CLI_ID; CLI_V_CLI_ID || chr(9) || CLI_V_CLI_ID
+
+
+    [MII]
+    Deseja alterar o cliente vinculado (cliente destino) no pedido: [PDV]?
+
+    [PLI]
+    BEGIN
+
+    UPDATE FOCCO3I.TCLI_VINC_CLI 
+      SET CLI_ID_DEST = [CLI_V_CLI]
+     WHERE ID = [CLI_V_CLI_ID];
+     COMMIT;
+      
+
+    END;
+
+
+    [MIF]
+    Alterado o cliente vinculado (cliente destino) no pedido: [PEDIDO]!
+ >>
+
+<<ALTERAR_TP_NOTA
+  ##> '[$DRILL$]' = 'ALTERAR_TP_NOTA' <##
+  [PAR]
+  [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+  [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+  [EMPRESA] : -empresa : FK : (SELECT EMPR_ID FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);EMPR_ID;EMPR_ID || chr(9) || EMPR_ID 
+  [TP_NF] : Tipos de nota fiscal : FK : (SELECT ID, COD_TP_NF, DESCRICAO FROM FOCCO3I.TTIPOS_NF); ID "ID#0", COD_TP_NF "Cód. Tipo de NFS", DESCRICAO "Nota fiscal de saída#50";ID || chr(9) || COD_TP_NF || ' - ' || DESCRICAO
+
+  [MII]
+  Deseja alterar o tipo de nota?
+
+  [PLI]
+  BEGIN
+
+  UPDATE FOCCO3I.TPEDIDOS_VENDA
+     SET TPNF_ID_DEFAULT = [TP_NF]
+    WHERE ID = [PDV];
+  COMMIT;
+
+  --/* Elaborar update caso seja necessário trocar nos itens que tem o mesmo tipo de nota*/
+
+  END;
+
+  [MIF]
+  Alterado o tipo de nota!
+
+>>

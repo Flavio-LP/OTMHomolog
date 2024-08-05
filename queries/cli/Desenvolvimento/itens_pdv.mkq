@@ -1,0 +1,120 @@
+<< CONSULTAR_ITENS
+    ##> '[$DRILL$]' = 'CONSULTAR_ITENS' <##
+    [PAR]
+    [VARIAVEL]: -Teste: FK: (select '[$DRIL'||'L$]' X from dual);X;X||chr(9)||X
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+    [EMPRESA]: -EMPRESA: FK: (select PCO.EMPRESA X from TLIBERA_PDV_COM_OTM PCO where rowid = '[$ID$]');X;X||chr(9)||X
+
+    [PLE]
+    RID#0
+
+    [OPC]
+     
+      +> ALTERAR_COMISSAO_ITEM :%SVGD/dolar : Alterar Comissão do item : NSair
+
+      +> ALTERAR_ALMOXARIFADO :%SVGD/dolar : Alterar Almoxarifados : NSair
+
+    [PLF]
+
+      #> '[OPC]' = 'ALTERAR_COMISSAO_ITEM' <#
+      @>MKQ
+      #CLI/Desenvolvimento/itens_pdv[VARIAVEL]ALTERAR_COMISSAO_ITEM[$RID$][PLE]
+
+      #> '[OPC]' = 'ALTERAR_ALMOXARIFADO' <#
+      @>MKQ
+      #CLI/Desenvolvimento/itens_pdv[VARIAVEL]ALTERAR_ALMOXARIFADO[$RID$][PLE]
+
+
+    [SQL]
+    SELECT  '#MKQ:cli/Desenvolvimento/itens_pdv[$DRILL$'||']VARIAVEL'||TITENS_PDV.ROWID DRILL#0,
+            TITENS_PDV.ROWID "RID#0",
+            TITENS_PDV.NUM_ITEM "NUM. ITEM#2",
+            TITENS_COMERCIAL.COD_ITEM || ' - '|| TITENS_PDV.DESCRICAO "ITEM#5",
+            TITENS_PDV.PERC_COMIS "COMISSAO#N2",
+            (SELECT TALMOXARIFADOS.COD_ALMOX || ' - ' || TALMOXARIFADOS.DESCRICAO
+               FROM FOCCO3I.TALMOXARIFADOS TALMOXARIFADOS
+              WHERE TALMOXARIFADOS.ID = TITENS_PDV.ALMOX_ID )"ALMOX#2",
+            TITENS_PDV.QTDE "QTD#N1",
+            TITENS_PDV.VLR_CUSTO "VLR UNT#2",
+            TITENS_PDV.VLR_LIQ "VLR LIQ#N3",
+            TITENS_PDV.VLR_LIQ_IPI "VLR_IPI#N5",
+            (SELECT TTIPOS_NF.COD_TP_NF || ' - ' || TTIPOS_NF.DESCRICAO
+               FROM FOCCO3I.TTIPOS_NF TTIPOS_NF
+              WHERE TTIPOS_NF.ID = TITENS_PDV.TPNF_ID) "TP NOTA#10" 
+      FROM FOCCO3I.TITENS_PDV TITENS_PDV,
+           FOCCO3I.TPEDIDOS_VENDA TPEDIDOS_VENDA,
+           FOCCO3I.TITENS_COMERCIAL TITENS_COMERCIAL  
+     WHERE TITENS_PDV.PDV_ID = TPEDIDOS_VENDA.ID
+       AND TITENS_COMERCIAL.ID = TITENS_PDV.ITCM_ID
+       AND TPEDIDOS_VENDA.ID = [PDV]
+       AND TPEDIDOS_VENDA.EMPR_ID = [EMPRESA]
+  GROUP BY  TITENS_PDV.NUM_ITEM,
+            TITENS_COMERCIAL.COD_ITEM || ' - '|| TITENS_PDV.DESCRICAO,
+            TITENS_PDV.PERC_COMIS,
+            TITENS_PDV.ALMOX_ID,
+            TITENS_PDV.QTDE,
+            TITENS_PDV.VLR_CUSTO,
+            TITENS_PDV.VLR_LIQ,
+            TITENS_PDV.VLR_LIQ_IPI,
+            TITENS_PDV.TPNF_ID,
+            TITENS_PDV.ROWID
+    ORDER BY 3 ASC
+  >>
+
+ <<ALTERAR_COMISSAO
+  ##> '[$DRILL$]' = 'ALTERAR_COMISSAO_ITEM' <##
+
+  [PAR]
+  [ITCM] : -ITCM : FK : (SELECT ITCM_ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');ITCM_ID; ITCM_ID || chr(9) || ITCM_ID
+  [ITEM] : -Item : FK : (SELECT COD_ITEM FROM FOCCO3I.TITENS_COMERCIAL WHERE ID = [ITCM]);COD_ITEM; COD_ITEM || chr(9) || COD_ITEM
+  [ITPDV_ID] : -ITPDV_ID : FK : ( SELECT ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');ID; ID || chr(9) || ID 
+  [COMISSAO] : Comissão : NM250 : 1; 0;999 : 0
+  
+  [MII]
+  Deseja alterar a comissão do item: [ITEM] ?
+
+  [PLI]
+  BEGIN
+
+    UPDATE FOCCO3I.TITENS_PDV 
+      SET PERC_COMIS = [COMISSAO]
+    WHERE ID = [ITPDV_ID];
+    COMMIT;
+
+  END;
+  
+
+  [MIF]
+  Comissão do item: [ITEM] alterada!
+>>
+
+<<ALTERAR_ALMOXARIFADO
+  ##> '[$DRILL$]' = 'ALTERAR_ALMOXARIFADO' <##
+
+  [PAR]
+  [ITCM] : -ITCM : FK : (SELECT ITCM_ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');ITCM_ID; ITCM_ID || chr(9) || ITCM_ID
+  [ITEM] : -Item : FK : (SELECT COD_ITEM FROM FOCCO3I.TITENS_COMERCIAL WHERE ID = [ITCM]);COD_ITEM; COD_ITEM || chr(9) || COD_ITEM
+  [ITPDV_ID] : -ITPDV_ID : FK : ( SELECT ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');ID; ID || chr(9) || ID 
+  [PDV] : -pdv : FK : (SELECT PDV_ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');PDV_ID;PDV_ID || chr(9) || PDV_ID
+  [EMPRESA]: -empresa : FK : (SELECT EMPR_ID FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);EMPR_ID; EMPR_ID || chr(9) || EMPR_ID
+  [ALMOXARIFADOS] : Almoxarifados : FK :(SELECT ID, COD_ALMOX, DESCRICAO FROM FOCCO3I.TALMOXARIFADOS WHERE EMPR_ID = [EMPRESA] ORDER BY 2 ASC);ID "Id#0", COD_ALMOX "Cód. Almox#5", DESCRICAO "Almoxarifado#50";ID || chr(9) || COD_ALMOX || ' - ' || DESCRICAO
+  
+  [MII]
+    Deseja alterar o almoxarifado do item: [ITEM]?
+
+  [PLI]
+  BEGIN
+
+   UPDATE FOCCO3I.TITENS_PDV
+     SET ALMOX_ID = [ALMOXARIFADOS]
+    WHERE ID =[ITPDV_ID];
+    COMMIT;
+
+  END;
+
+  [MIF]
+  Alterado o almoxarigado do item: [ITEM]
+  
+
+>>

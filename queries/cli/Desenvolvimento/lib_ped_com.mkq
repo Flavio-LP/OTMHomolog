@@ -1,0 +1,216 @@
+
+<< Liberação Financeira de Pedidos
+    ##> '[$DRILL$]' like '%DRILL%' <##
+    [TIT]
+    Liberação Financeira de Pedidos
+    
+    [PAR]
+    [VARIAVEL]: -Teste: FK: (select '[$DRIL'||'L$]' X from dual);X;X||chr(9)||X
+    [SESSAO] : -Sessao	 : FK    : (SELECT SYS_CONTEXT('USERENV','SESSIONID') sessao FROM DUAL);sessao;sessao||chr(9)||sessao;1=1
+    [EMPRESA] : Empresa:      FK500: *( SELECT 0 ID, 0 COD_EMP ,'Todas' NOME FROM dual union SELECT ID, COD_EMP, NOME_FAN NOME FROM FOCCO3I.TEMPRESAS WHERE EMPR_ID IN (101) ORDER BY 1);COD_EMP "Código#10",nome "Empresa#40";id||chr(9)||nome
+    [PEDIDOS]:		 Pedido:		TX250: 100;U: 0
+   -- [SITUACAOC]:		Situação Comercial:					DC250: LIB^Liberado Comercial^BLQ^Bloqueado Comercial^T^Todos: Bloqueado Comercial
+    [SITUACAOC]:		Situação Comercial:					DC250: BLQ^Bloqueado Comercial: Bloqueado Comercial 
+    [SITUACAOF]:		Situação Financeira:					DC250: LIB^Liberado Financeiro^BLQ^Bloqueado Financeiro ^T^Todos: Todos
+    [DIVISOES]: Divisões : FK250 :(SELECT  0 COD_DIVD, 'Todas' DESCRICAO FROM DUAL UNION SELECT DISTINCT COD_DIVD, DESCRICAO FROM FOCCO3I.TDIVISOES_VENDAS WHERE EMPR_ID IN ([EMPRESA]));COD_DIVD "Cód. Divisão#50",DESCRICAO "DESC#50"; COD_DIVD || chr(9) || DESCRICAO
+    [REGIAO]: Região : FK250 :(SELECT 0 ID,0 COD_REG, 'Todas' DESCRICAO FROM DUAL UNION SELECT ID, COD_REG, DESCRICAO FROM FOCCO3I.TREGIOES);COD_REG "Cód. Região#5",DESCRICAO "Região#50"; COD_REG || chr(9) || DESCRICAO
+    [SUPERVISOR]:		 Supervisor:	 FK250 :   (   SELECT 0 ID, 0 COD_REP ,'Todos' DESCRICAO FROM DUAL UNION
+                                                   SELECT TREPRESENTANTES_COORD.id ,TREPRESENTANTES_COORD.COD_REP  ,TREPRESENTANTES_COORD.DESCRICAO
+                                                   FROM FOCCO3I.TREPRESENTANTES TREPRESENTANTES,
+                                                         FOCCO3I.TREPRESENTANTES TREPRESENTANTES_COORD,
+                                                         FOCCO3I.TREP_HIERARQUIA TREP_HIERARQUIA,
+                                                         FOCCO3I.TEMP_REP TEMP_REP,
+                                                         FOCCO3I.TCAT_REP TCAT_REP  
+                                                   WHERE TREP_HIERARQUIA.REP_ID = TREPRESENTANTES.ID
+                                                   AND TREP_HIERARQUIA.REP_SUP_ID = TREPRESENTANTES_COORD.ID
+                                                   AND TEMP_REP.REP_ID = TREPRESENTANTES.ID
+                                                   AND TREPRESENTANTES_COORD.CAT_REP_ID  = TCAT_REP.ID
+                                                   AND TCAT_REP.COD_CAT_REP = 4
+                                                   AND TEMP_REP.ATIVO = 1
+                                                      GROUP BY TREPRESENTANTES_COORD.DESCRICAO, TREPRESENTANTES_COORD.id  ,TREPRESENTANTES_COORD.COD_REP  ); COD_REP"Cód. Supervisor#5", DESCRICAO "Supervisor#50";ID || chr(9) || DESCRICAO
+    [REPRESENTANTE]: Representante : FK250 : (SELECT 0 ID ,0 COD_REP, 'Todos' DESCRICAO FROM DUAL UNION SELECT ID, COD_REP, DESCRICAO  FROM FOCCO3I.TREPRESENTANTES); COD_REP "Cód. Representante#5", DESCRICAO "Representante#50"; ID || chr(9) || DESCRICAO 
+
+    
+    
+    [PLI]
+
+      DECLARE
+
+         EMPR VARCHAR2(50);
+
+
+       BEGIN
+
+         EMPR := '[EMPRESA]';
+
+         IF EMPR = '0' THEN
+            EMPR := '1,2,3,4,5,7';
+         END IF;
+
+       PLIBERA_PDV_COM_OTM (
+                             [SESSAO]		
+                            ,EMPR
+                            ,'[PEDIDOS]'	
+                            ,'[SITUACAOF]'
+                            ,'[SITUACAOC]'	
+                            ,[DIVISOES]
+                            ,[REGIAO]
+                            ,[SUPERVISOR]
+                            ,[REPRESENTANTE]
+                         );
+
+         --P_BUSCA_CNPJAXFOCCO([SESSAO],NULL, NULL, 1);
+       END;
+    
+    
+    [DIM]
+    90 : 50 : 0 : 25 : 80 : 15 : 100
+ 
+    [PLE]
+    *ROWID#0
+    
+    [OPC]
+       +> LIBERAR_PEDIDO: %SVGC/icone/lib-com/unlock : Liberar Pedido : NSair 
+ 
+       +> CONSULTAR_CLIENTES: %SVGC/icone/lib-com/people-svgrepo : Consultar clientes : NSair 
+
+       --+> CONSULTAR_ITENS: %SVGC/icone/lib-com/list-svgrepo : Consultar itens do pedido : NSair 
+
+       
+    [PLF]
+       #> '[OPC]'='LIBERAR_PEDIDO'<#
+       @>MKQ
+       #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]LIBERAR_PEDIDO[$ROWID$][PLE]
+ 
+       #> '[OPC]'='CONSULTAR_CLIENTES'<#
+       @>MKQ
+       #CLI/Desenvolvimento/lib_ped_com[VARIAVEL]CONSULTAR_CLIENTES[$ROWID$][PLE]
+
+       --#> '[OPC]'='CONSULTAR_ITENS'<#
+       --@>MKQ
+       --#CLI/Desenvolvimento/itens_pdv[VARIAVEL]CONSULTAR_ITENS[$ROWID$][PLE]
+
+       
+    
+    [SQL]
+   SELECT
+         '#MKQ:cli/Desenvolvimento/detahe_ped_com[$DRILL$'||']VARIAVEL'||LCO.ROWID DRILL#0,
+          LCO.ROWID "ROWID#0",
+          LCO.DIVISAO_VENDAS "DIVISÃO DE VENDAS#3", 
+          LCO.EMPRESA "EMP#1",
+          LCO.NUM_PEDIDO "PEDIDO#2",
+          CASE WHEN LCO.SIT_PDV_COM  = 'LIB' THEN
+               '#IMG^%SVGC/icone/lib-com/correct-svgrepo|@'||'VDE'
+               ELSE 
+               '#IMG^%SVGC/icone/lib-com/wrong|@'||'VRM'
+           END "COM#2",
+          CASE WHEN LCO.SIT_PDV_FIN  = 'LIB' THEN
+           '#IMG^%SVGC/icone/lib-com/correct-svgrepo|@'||'VDE'
+           ELSE 
+           '#IMG^%SVGC/icone/lib-com/wrong|@'||'VRM'
+          END "FIN#2",
+          CASE WHEN FX_VERIFICA_CLI_LIB_COM([SESSAO],LCO.CLI_ID, 'SEFAZ') = 'Ok' THEN 
+                  '#IMG^%SVGI/ios-radio-button-on|@'||'VDE'
+               WHEN FX_VERIFICA_CLI_LIB_COM([SESSAO],LCO.CLI_ID, 'SEFAZ') = 'NOT_FOUND' THEN
+                  '#IMG^%SVGI/ios-radio-button-on|@'||'AMR'
+               ELSE  '#IMG^%SVGI/ios-radio-button-on|@'||'VRM'
+          END "SEFAZ#1",
+          CASE WHEN FX_VERIFICA_CLI_LIB_COM([SESSAO],LCO.CLI_ID, 'IE') = 'Ok' THEN 
+               '#IMG^%SVGI/ios-radio-button-on|@'||'VDE'
+               WHEN FX_VERIFICA_CLI_LIB_COM([SESSAO],LCO.CLI_ID, 'IE') = 'NOT_FOUND' THEN
+                  '#IMG^%SVGI/ios-radio-button-on|@'||'AMR'
+               ELSE  '#IMG^%SVGI/ios-radio-button-on|@'||'VRM'
+          END "IE#1",
+          CASE WHEN FX_VERIFICA_CLI_LIB_COM([SESSAO],LCO.CLI_ID, 'SIMPLES') = 'Ok' THEN 
+               '#IMG^%SVGI/ios-radio-button-on|@'||'VDE'
+               WHEN FX_VERIFICA_CLI_LIB_COM([SESSAO],LCO.CLI_ID, 'SIMPLES') = 'NOT_FOUND' THEN
+                  '#IMG^%SVGI/ios-radio-button-on|@'||'AMR'
+               ELSE  '#IMG^%SVGI/ios-radio-button-on|@'||'VRM'
+          END "SIMPLES#2",
+          CASE WHEN FX_VERIFICA_CLI_LIB_COM([SESSAO],LCO.CLI_ID, 'SUFRAMA') = 'Ok' THEN 
+               '#IMG^%SVGI/ios-radio-button-on|@'||'VDE'
+               WHEN FX_VERIFICA_CLI_LIB_COM([SESSAO],LCO.CLI_ID, 'SUFRAMA') = 'NOT_FOUND' THEN
+                  '#IMG^%SVGI/ios-radio-button-on|@'||'AMR'
+               ELSE  '#IMG^%SVGI/ios-radio-button-on|@'||'VRM'
+          END "SUFRAMA#2",
+          CASE WHEN FX_VERIFICA_CLI_LIB_COM([SESSAO],LCO.CLI_ID, 'END') = 'Ok' THEN 
+               '#IMG^%SVGI/ios-radio-button-on|@'||'VDE'
+               WHEN FX_VERIFICA_CLI_LIB_COM([SESSAO],LCO.CLI_ID, 'END') = 'NOT_FOUND' THEN
+                  '#IMG^%SVGI/ios-radio-button-on|@'||'AMR'
+               ELSE  '#IMG^%SVGI/ios-radio-button-on|@'||'VRM'
+          END "END#1",
+          LCO.TP_FRETE "TIPO DE FRETE#1",
+          LCO.DATA_ENTREGA "DATA ENTREGA#D5",
+          LCO.FIRME "FIRME#2",
+          LCO.CLIENTE "CLIENTE#10",
+          LCO.COND_PAGTO "CODIÇÃO DE PAGAMENTO#10",
+          LCO.VALOR_TOTAL "VALOR TOTAL #N5"
+   FROM TLIBERA_PDV_COM_OTM LCO,
+        T_CLI_CNPJA_PDV_COM CPC
+    WHERE LCO.SESSAO = [SESSAO]
+     AND  CPC.CLI_ID(+) = LCO.CLI_ID
+     AND CPC.SESSAO(+) = LCO.SESSAO
+   ORDER BY 4 ASC
+    
+ 
+    << CONSULTAR CLIENTES
+       ##> '[$DRILL$]' = 'CONSULTAR_CLIENTES' <##
+       
+       
+       [DIM]
+       98 : 32 : 0 : 25 : 95 : 15 : 110
+
+       [PAR]
+       [SESSAO] : -Sessao	 : FK    : (SELECT SYS_CONTEXT('USERENV','SESSIONID') sessao FROM DUAL);sessao;sessao||chr(9)||sessao;1=1
+       [VARIAVEL]: -Teste: FK: (select '[$DRIL'||'L$]' X from dual);X;X||chr(9)||X
+       [EMPRESA]: -Pedido: FK: (select PCO.EMPRESA X from TLIBERA_PDV_COM_OTM PCO where rowid = '[$ROWID$]');X;X||chr(9)||X
+       [CLIENTE]: -Empresa: FK: (select DISTINCT PCO.CLI_ID X from TLIBERA_PDV_COM_OTM PCO where rowid = '[$ROWID$]');X;X||chr(9)||X
+       
+       [PAR]
+
+       [GRD_EMPRESA] : -grd_empresa : FK :(select x from (SELECT  NOME_FAN x FROM FOCCO3I.TEMPRESAS WHERE ID = [EMPRESA])); x;0||chr(9)||x;1=1
+       [GRD_CLIENTE] : -grd_cliente : FK :(SELECT DISTINCT PCO.CLIENTE || ' - ' || CPC.UF_CLIENTE ||  ' - ' || otm_formata(PCO.CNPJ,'CNPJ','F')  x
+                                                      FROM TLIBERA_PDV_COM_OTM PCO,
+                                                            T_CLI_CNPJA_PDV_COM CPC
+                                                         WHERE PCO.SESSAO = [$SESSAO$]
+                                                           AND PCO.CLI_ID = [CLIENTE]
+                                                           AND CPC.CLI_ID = PCO.CLI_ID
+                                                           AND EMPRESA = [EMPRESA]); x;0||chr(9)||x;1=1
+     
+       [GRD]
+       [01] : {[GRD_EMPRESA]}
+       [02] : {[GRD_CLIENTE]}
+     
+ 
+       [SQL]
+       SELECT CPC.SISTEMA "[01][02]SISTEMA#5",
+              CPC.DT_CONSULTA "[01][02]DATA DA CONSULTA#D5",
+              CPC.STATUS_SIT_CAD "[01][02]SIT. CADASTRAL#5",
+              CPC.DT_SIT_CAD "[01][02]DATA SIT. CADASTRAL#D5",
+              CPC.STATUS_IE "[01][02]STATUS IE#5",
+              CPC.IE "[01][02]IE#5",
+              CPC.SIMP_NAC "[01][02]SIMPLES NACIONAL#5",
+              CPC.SUFRAMA_DESC "[01][02]SUFRAMA#5",
+              CPC.SUFRAMA_COD "[01][02]CAD. SUFRAMA#5",
+              CPC.LOGRADOURO "[01][02]LOGRADOURO#10",
+              CPC.NR_END "[01][02]NR. ENDEREÇO#5",
+              CPC.BAIRRO "[01][02]BAIRRO#5",
+              CPC.CIDADE "[01][02]CIDADE#5",
+              CPC.CEP "[01][02]CEP#5",
+              CPC.IBGE "[01][02]IBGE#5"
+        FROM  V_CLI_PDV_COM CPC
+      WHERE CPC.CLIENTE_ID = [CLIENTE]
+        AND CPC.SESSAO = [SESSAO]
+    >>
+ 
+    << CONSULTAR_ITENS
+      ##> '[$DRILL$]' = 'CONSULTAR_ITENS' <##
+      [PAR]
+      [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ROWID$]');X;X||chr(9)||X
+      [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ROWID = '[$ROWID$]');NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+
+      [SQL]
+      SELECT * FROM FOCCO3I.TITENS_PDV WHERE PDV_ID = [PDV]
+    >>
+
+   
