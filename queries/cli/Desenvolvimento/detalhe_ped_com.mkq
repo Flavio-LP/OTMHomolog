@@ -67,9 +67,9 @@
        
       +> ALTERAR_DIVISAO_VENDAS :%SVGC/icone/lib-com/sale-svgrepo: Alterar divisão de vendas : NSair 
 
-      +> ALTERAR_ORDEM_COMPRA :%SVGC/icone/lib-com/sale-svgrepo: Alterar ordem de compra : NSair 
+      +> ALTERAR_ORDEM_COMPRA :%SVGC/icone/lib-com/order_up: Alterar ordem de compra : NSair 
 
-      +> ALTERAR_COMISSAO :%SVGC/icone/lib-com/sale-svgrepo: Alterar comissões : NSair 
+      +> ALTERAR_COMISSAO :%SVGC/icone/lib-com/exchange_trade: Alterar comissões : NSair 
 
       +> ALTERAR_REPRESENTANTE: %SVGC/icone/lib-com/people-svgrepo : Alterar representante : NSair
 
@@ -78,9 +78,9 @@
                                                                                                                 where id = [PDV]
                                                                                                                   and CLI_V_CLI_ID is not null ) 
       
-      +> ALTERAR_TP_NOTA :  %SVGC/icone/lib-com/user-people-account : Alterar tipo de nota fiscal : NSair
+      +> ALTERAR_TP_NOTA :  %SVGC/icone/lib-com/free_icon_1 : Alterar tipo de nota fiscal : NSair
 
-
+      +> ALTERAR_PRAZO : %SVGC/icone/lib-com/calendar_01 : Alterar prazo (dias de entrega) : NSair
 
       --Criar tela para inserir desconto/acrescimo
 
@@ -141,6 +141,10 @@
     #> '[OPC]'='ALTERAR_TP_NOTA'<#
     @>MKQ
     #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_TP_NOTA[$ID$][PLE]
+
+    #> '[OPC]'='ALTERAR_PRAZO'<#
+    @>MKQ
+    #CLI/Desenvolvimento/detalhe_ped_com[VARIAVEL]ALTERAR_PRAZO[$ID$][PLE]
     
 
    [SQL]
@@ -501,8 +505,8 @@
 
     ##> '[$DRILL$]' = 'ALTERAR_ORDEM_COMPRA' <##
     [TIT]
-    Alteração de divisão de vendas
- 
+    Alteração de ordem de compras
+
     [PAR]
     [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
 
@@ -669,4 +673,36 @@
   [MIF]
   Alterado o tipo de nota!
 
+>>
+
+<<ALTERAR_PRAZO
+    ##> '[$DRILL$]' = 'ALTERAR_PRAZO' <##
+    [PAR]
+    [PDV] : -pdv : FK : (SELECT PDV_ID X FROM TLIBERA_PDV_COM_OTM WHERE ROWID = '[$ID$]');X;X||chr(9)||X
+    [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
+    [EMPRESA] : -empresa : FK : (SELECT EMPR_ID FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);EMPR_ID;EMPR_ID || chr(9) || EMPR_ID
+    [PRAZO] : Prazo de dias : NM250 : 0 ;0;999 : 0
+    
+    [MII]
+    Deseja alterar o prazo de entrega em dias no pedido: [PEDIDO]?
+
+    [PLI]
+    BEGIN
+
+    UPDATE FOCCO3I.TPEDIDOS_VENDA
+       SET PRAZO = [PRAZO]
+     WHERE ID = [PDV];
+     COMMIT;
+
+    UPDATE TLIBERA_PDV_COM_OTM
+      SET PRAZO = [PRAZO]
+    WHERE PDV_ID = [PDV]
+      AND SESSAO = [$SESSAO$];
+    COMMIT;
+
+    END;
+
+    [MIF]
+    Alterado o prazo de entrega em dias no pedido: [PEDIDO]!
+    
 >>
