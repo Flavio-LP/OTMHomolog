@@ -13,7 +13,9 @@
      
       +> ALTERAR_COMISSAO_ITEM :%SVGD/dolar : Alterar Comissão do item : NSair
 
-      +> ALTERAR_ALMOXARIFADO :%SVGD/dolar : Alterar Almoxarifados : NSair
+      +> ALTERAR_ALMOXARIFADO :%SVGC/icone/lib-com/Almoxarifados : Alterar Almoxarifados : NSair
+
+      +> ALTERA_TP_NF_ITEM  :%SVGC/icone/lib-com/free_icon_1 : Alterar tipo de nota fiscal por item : NSair
 
     [PLF]
 
@@ -24,6 +26,11 @@
       #> '[OPC]' = 'ALTERAR_ALMOXARIFADO' <#
       @>MKQ
       #CLI/Desenvolvimento/itens_pdv[VARIAVEL]ALTERAR_ALMOXARIFADO[$RID$][PLE]
+
+      #> '[OPC]' = 'ALTERA_TP_NF_ITEM' <#
+      @>MKQ
+      #CLI/Desenvolvimento/itens_pdv[VARIAVEL]ALTERA_TP_NF_ITEM[$RID$][PLE]
+
 
 
     [SQL]
@@ -115,6 +122,34 @@
 
   [MIF]
   Alterado o almoxarigado do item: [ITEM]
-  
+>>
+
+<<ALTERA_TP_NF_ITEM
+  ##> '[$DRILL$]' = 'ALTERA_TP_NF_ITEM' <##
+  [PAR]
+  [ITCM] : -ITCM : FK : (SELECT ITCM_ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');ITCM_ID; ITCM_ID || chr(9) || ITCM_ID
+  [ITEM] : -Item : FK : (SELECT COD_ITEM FROM FOCCO3I.TITENS_COMERCIAL WHERE ID = [ITCM]);COD_ITEM; COD_ITEM || chr(9) || COD_ITEM
+  [ITPDV_ID] : -ITPDV_ID : FK : ( SELECT ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');ID; ID || chr(9) || ID 
+  [PDV] : -pdv : FK : (SELECT PDV_ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');PDV_ID;PDV_ID || chr(9) || PDV_ID
+  [EMPRESA]: -empresa : FK : (SELECT EMPR_ID FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);EMPR_ID; EMPR_ID || chr(9) || EMPR_ID
+  [TP_NF] : Tipos de nota fiscal : FK : (SELECT ID, COD_TP_NF, DESCRICAO FROM FOCCO3I.TTIPOS_NF); ID "ID#0", COD_TP_NF "Cód. Tipo de NFS", DESCRICAO "Nota fiscal de saída#50";ID || chr(9) || COD_TP_NF || ' - ' || DESCRICAO
+
+  [MII]
+  Deseja alterar o tipo de nota fiscal do item: [ITCM]?
+
+  [PLI]
+  BEGIN
+
+  UPDATE FOCCO3I.TITENS_PDV
+    SET TPNF_ID = [TP_NF]
+   WHERE ID = [ITPDV_ID];
+
+   COMMIT;
+
+  END;
+
+  [MIF]
+  Alterado o tipo de nota fiscal do item: [ITCM]!
+
 
 >>
