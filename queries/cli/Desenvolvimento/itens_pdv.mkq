@@ -6,6 +6,8 @@
     [PEDIDO] : -pedido : FK : (SELECT DISTINCT NUM_PEDIDO FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);NUM_PEDIDO;NUM_PEDIDO || chr(9) || NUM_PEDIDO
     [EMPRESA]: -EMPRESA: FK: (select PCO.EMPRESA X from TLIBERA_PDV_COM_OTM PCO where rowid = '[$ID$]');X;X||chr(9)||X
 
+    [TIT]Itens do pedido: [PEDIDO]
+
     [PLE]
     RID#0
 
@@ -16,6 +18,8 @@
       +> ALTERAR_ALMOXARIFADO :%SVGC/icone/lib-com/Almoxarifados : Alterar Almoxarifados : NSair
 
       +> ALTERA_TP_NF_ITEM  :%SVGC/icone/lib-com/free_icon_1 : Alterar tipo de nota fiscal por item : NSair
+
+      +> ALTERAR_QTD_ITEM  :%SVGC/icone/lib-com/item_qtd_2 : Alterar a quantidade do item : NSair
 
     [PLF]
 
@@ -31,6 +35,9 @@
       @>MKQ
       #CLI/Desenvolvimento/itens_pdv[VARIAVEL]ALTERA_TP_NF_ITEM[$RID$][PLE]
 
+      #> '[OPC]' = 'ALTERAR_QTD_ITEM' <#
+      @>MKQ
+      #CLI/Desenvolvimento/itens_pdv[VARIAVEL]ALTERAR_QTD_ITEM[$RID$][PLE]
 
 
     [SQL]
@@ -150,6 +157,34 @@
 
   [MIF]
   Alterado o tipo de nota fiscal do item: [ITCM]!
+>>
 
+<<ALTERAR_QTD_ITEM
+  ##> '[$DRILL$]' = 'ALTERAR_QTD_ITEM' <##
+  [PAR]
+  [ITCM] : -ITCM : FK : (SELECT ITCM_ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');ITCM_ID; ITCM_ID || chr(9) || ITCM_ID
+  [ITEM] : -Item : FK : (SELECT COD_ITEM FROM FOCCO3I.TITENS_COMERCIAL WHERE ID = [ITCM]);COD_ITEM; COD_ITEM || chr(9) || COD_ITEM
+  [ITPDV_ID] : -ITPDV_ID : FK : ( SELECT ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');ID; ID || chr(9) || ID 
+  [PDV] : -pdv : FK : (SELECT PDV_ID FROM FOCCO3I.TITENS_PDV WHERE ROWID = '[$RID$]');PDV_ID;PDV_ID || chr(9) || PDV_ID
+  [EMPRESA]: -empresa : FK : (SELECT EMPR_ID FROM FOCCO3I.TPEDIDOS_VENDA WHERE ID = [PDV]);EMPR_ID; EMPR_ID || chr(9) || EMPR_ID
+  [QTD_ITEM] : Quantidade do item : NM250 : 0 ;0; 999999999999 : 0
 
+  [MII]
+  Deseja alterar a quantidade do item: [ITEM]?
+
+  [PLI]
+  BEGIN
+  
+  UPDATE FOCCO3I.TITENS_PDV
+     SET QTDE = [QTD_ITEM]
+   WHERE ID = [ITPDV_ID];
+
+   COMMIT;
+
+  END;
+
+  [MIF]
+  Alterado a quantidade do item: [ITEM]!
+  
+  
 >>
